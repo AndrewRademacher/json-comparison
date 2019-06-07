@@ -25,3 +25,6 @@ target_link_libraries(json_comparison PRIVATE ${CONAN_LIBS})
 
 add_executable(nlohmann_benchmark src/nlohmann_benchmark.cpp)
 target_link_libraries(nlohmann_benchmark PRIVATE ${CONAN_LIBS} ${LIB_BENCHMARK})
+
+add_executable(rapid_benchmark src/rapid_benchmark.cpp)
+target_link_libraries(rapid_benchmark PRIVATE ${CONAN_LIBS} ${LIB_BENCHMARK})
