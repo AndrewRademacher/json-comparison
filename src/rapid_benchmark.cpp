@@ -1,13 +1,10 @@
 #include <benchmark/benchmark.h>
-//#include <nlohmann/json.hpp>
 #include <rapidjson/document.h>
 #include <rapidjson/istreamwrapper.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
 #include <fstream>
 
-//using json = nlohmann::json;
-//using json = rapidjson::;
 using namespace rapidjson;
 
 //////////////////////////////////////////////////////////////////////////////
@@ -20,12 +17,9 @@ static void ParseFile(benchmark::State& state, const char* filename)
     {
         state.PauseTiming();
         auto* f = new std::ifstream(filename);
-//        auto* j = new json();
         auto* j = new Document();
         state.ResumeTiming();
 
-//        *j = json::parse(*f);
-//        j->Parse(*f);
         IStreamWrapper isw(*f);
         j->ParseStream(isw);
 
@@ -59,11 +53,9 @@ static void ParseString(benchmark::State& state, const char* filename)
     while (state.KeepRunning())
     {
         state.PauseTiming();
-//        auto* j = new json();
         auto* j = new Document();
         state.ResumeTiming();
 
-//        *j = json::parse(str);
         j->Parse(str.data());
 
         state.PauseTiming();
@@ -91,19 +83,16 @@ static void Dump(benchmark::State& state, const char* filename, int indent)
 {
     std::ifstream f(filename);
     std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-//    json j = json::parse(str);
     Document j;
     j.Parse(str.data());
 
     while (state.KeepRunning())
     {
-//        j.dump(indent);
         StringBuffer buffer;
         Writer<StringBuffer> writer(buffer);
         j.Accept(writer);
     }
 
-//    state.SetBytesProcessed(state.iterations() * j.dump(indent).size());
     StringBuffer buffer;
     Writer<StringBuffer> writer(buffer);
     j.Accept(writer);
