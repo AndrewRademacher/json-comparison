@@ -28,3 +28,8 @@ target_link_libraries(nlohmann_benchmark PRIVATE ${CONAN_LIBS} ${LIB_BENCHMARK})
 
 add_executable(rapid_benchmark src/rapid_benchmark.cpp)
 target_link_libraries(rapid_benchmark PRIVATE ${CONAN_LIBS} ${LIB_BENCHMARK})
+
+add_executable(rapid_schema src/rapid_schema.cpp)
+target_link_libraries(rapid_schema PRIVATE ${CONAN_LIBS})
+target_compile_definitions(rapid_schema PRIVATE
+        RAPIDJSON_HAS_STDSTRING=1)
