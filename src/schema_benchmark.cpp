@@ -97,46 +97,4 @@ BENCHMARK_CAPTURE(ParseString, signed_ints,         "../data/numbers/signed_ints
 BENCHMARK_CAPTURE(ParseString, unsigned_ints,       "../data/numbers/unsigned_ints.json",     "../schema/numbers/small_signed_ints.json");
 BENCHMARK_CAPTURE(ParseString, small_signed_ints,   "../data/numbers/small_signed_ints.json", "../schema/numbers/unsigned_ints.json");
 
-
-//////////////////////////////////////////////////////////////////////////////
-// serialize JSON
-//////////////////////////////////////////////////////////////////////////////
-
-static void Dump(benchmark::State& state, const char* filename, int indent)
-{
-    std::ifstream f(filename);
-    std::string str((std::istreambuf_iterator<char>(f)), std::istreambuf_iterator<char>());
-    Document j;
-    j.Parse(str.data());
-
-    while (state.KeepRunning())
-    {
-        StringBuffer buffer;
-        Writer<StringBuffer> writer(buffer);
-        j.Accept(writer);
-    }
-
-    StringBuffer buffer;
-    Writer<StringBuffer> writer(buffer);
-    j.Accept(writer);
-    state.SetBytesProcessed(state.iterations() * buffer.GetSize());
-}
-//BENCHMARK_CAPTURE(Dump, jeopardy / -,      "../data/jeopardy/jeopardy.json",                 -1);
-//BENCHMARK_CAPTURE(Dump, jeopardy / 4,      "../data/jeopardy/jeopardy.json",                 4);
-//BENCHMARK_CAPTURE(Dump, canada / -,        "../data/nativejson-benchmark/canada.json",       -1);
-//BENCHMARK_CAPTURE(Dump, canada / 4,        "../data/nativejson-benchmark/canada.json",       4);
-//BENCHMARK_CAPTURE(Dump, citm_catalog / -,  "../data/nativejson-benchmark/citm_catalog.json", -1);
-//BENCHMARK_CAPTURE(Dump, citm_catalog / 4,  "../data/nativejson-benchmark/citm_catalog.json", 4);
-//BENCHMARK_CAPTURE(Dump, twitter / -,       "../data/nativejson-benchmark/twitter.json",      -1);
-//BENCHMARK_CAPTURE(Dump, twitter / 4,       "../data/nativejson-benchmark/twitter.json",      4);
-//BENCHMARK_CAPTURE(Dump, floats / -,        "../data/numbers/floats.json",                    -1);
-//BENCHMARK_CAPTURE(Dump, floats / 4,        "../data/numbers/floats.json",                    4);
-//BENCHMARK_CAPTURE(Dump, signed_ints / -,   "../data/numbers/signed_ints.json",               -1);
-//BENCHMARK_CAPTURE(Dump, signed_ints / 4,   "../data/numbers/signed_ints.json",               4);
-//BENCHMARK_CAPTURE(Dump, unsigned_ints / -, "../data/numbers/unsigned_ints.json",             -1);
-//BENCHMARK_CAPTURE(Dump, unsigned_ints / 4, "../data/numbers/unsigned_ints.json",             4);
-//BENCHMARK_CAPTURE(Dump, small_signed_ints / -,   "../data/numbers/small_signed_ints.json",   -1);
-//BENCHMARK_CAPTURE(Dump, small_signed_ints / 4,   "../data/numbers/small_signed_ints.json",   4);
-
-
 BENCHMARK_MAIN();
