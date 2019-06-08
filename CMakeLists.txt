@@ -7,11 +7,13 @@ conan_basic_setup()
 
 if (APPLE)
     include_directories(/usr/local/include)
-endif()
+endif ()
 
 # Copy Data
 
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/data
+        DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/schema
         DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 # Dependencies
@@ -32,4 +34,9 @@ target_link_libraries(rapid_benchmark PRIVATE ${CONAN_LIBS} ${LIB_BENCHMARK})
 add_executable(rapid_schema src/rapid_schema.cpp)
 target_link_libraries(rapid_schema PRIVATE ${CONAN_LIBS})
 target_compile_definitions(rapid_schema PRIVATE
+        RAPIDJSON_HAS_STDSTRING=1)
+
+add_executable(schema_benchmark src/schema_benchmark.cpp)
+target_link_libraries(schema_benchmark PRIVATE ${CONAN_LIBS} ${LIB_BENCHMARK})
+target_compile_definitions(schema_benchmark PRIVATE
         RAPIDJSON_HAS_STDSTRING=1)
