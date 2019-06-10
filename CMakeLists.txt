@@ -40,3 +40,8 @@ add_executable(schema_benchmark src/schema_benchmark.cpp)
 target_link_libraries(schema_benchmark PRIVATE ${CONAN_LIBS} ${LIB_BENCHMARK})
 target_compile_definitions(schema_benchmark PRIVATE
         RAPIDJSON_HAS_STDSTRING=1)
+
+add_executable(orm_like src/orm_like.cpp)
+target_link_libraries(orm_like PRIVATE ${CONAN_LIBS})
+target_compile_definitions(orm_like PRIVATE
+        RAPIDJSON_HAS_STDSTRING=1)
