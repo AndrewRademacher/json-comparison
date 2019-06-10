@@ -3,9 +3,11 @@
 
 #include <fmt/format.h>
 #include <string>
+#include <string_view>
 #include <rapidjson/document.h>
 #include <rapidjson/schema.h>
 #include <rapidjson/stringbuffer.h>
+#include <rapidjson/writer.h>
 
 const char* address_schema = R"({
     "type": "object",
@@ -42,44 +44,56 @@ rapidjson::SchemaDocument parse_schema_document(const char* schema) {
 
 class address {
 public:
-    const std::string& line_1() const {
-        return _line1;
+
+    address()
+            :_document(rapidjson::kObjectType) { }
+
+    std::string_view line_1() const {
+        const auto& val = _document["line_1"];
+        return std::string_view(val.GetString(), val.GetStringLength());
     }
 
-    const std::string& line_2() const {
-        return _line2;
+    std::string_view line_2() const {
+        const auto& val = _document["line_2"];
+        return std::string_view(val.GetString(), val.GetStringLength());
     }
 
-    const std::string& city() const {
-        return _city;
+    std::string_view city() const {
+        const auto& val = _document["city"];
+        return std::string_view(val.GetString(), val.GetStringLength());
     }
 
-    const std::string& state() const {
-        return _state;
+    std::string_view state() const {
+        const auto& val = _document["state"];
+        return std::string_view(val.GetString(), val.GetStringLength());
     }
 
     uint32_t zip() const {
-        return _zip;
+        return _document["zip"].GetInt();
     }
 
-    void line_1(std::string line_1) {
-        _line1 = std::move(line_1);
+    void line_1(const std::string& line_1) {
+        _document.AddMember("line_1", line_1, _document.GetAllocator());
     }
 
-    void line_2(std::string line_2) {
-        _line2 = std::move(line_2);
+    void line_2(const std::string& line_2) {
+        _document.AddMember("line_2", line_2, _document.GetAllocator());
     }
 
-    void city(std::string city) {
-        _city = std::move(city);
+    void city(const std::string& city) {
+        _document.AddMember("city", city, _document.GetAllocator());
     }
 
-    void state(std::string state) {
-        _state = std::move(state);
+    void state(const std::string& state) {
+        _document.AddMember("state", state, _document.GetAllocator());
     }
 
     void zip(uint32_t zip) {
-        _zip = zip;
+        _document.AddMember("zip", zip, _document.GetAllocator());
+    }
+
+    rapidjson::Document& to_json() {
+        return _document;
     }
 
     static address from_json(const std::string& data) {
@@ -100,25 +114,12 @@ public:
         }
 
         address a;
-        const auto& line1 = doc["line_1"];
-        a._line1 = std::string(line1.GetString(), line1.GetStringLength());
-        const auto& line2 = doc["line_2"];
-        a._line2 = std::string(line2.GetString(), line2.GetStringLength());
-        const auto& city = doc["city"];
-        a._city = std::string(city.GetString(), city.GetStringLength());
-        const auto& state = doc["state"];
-        a._state = std::string(state.GetString(), state.GetStringLength());
-        const auto& zip = doc["zip"];
-        a._zip = zip.GetInt();
+        a._document = std::move(doc);
         return a;
     }
 
 private:
-    std::string _line1;
-    std::string _line2;
-    std::string _city;
-    std::string _state;
-    uint32_t _zip;
+    rapidjson::Document _document;
 };
 
 TEST_CASE("basic address") {
@@ -136,4 +137,26 @@ TEST_CASE("basic address") {
     REQUIRE(a.city() == "Kansas City");
     REQUIRE(a.state() == "MO");
     REQUIRE(a.zip() == 64111);
+}
+
+TEST_CASE("set address") {
+    const char* expected_data = R"({
+        "line_1": "111 W. 2nd St.",
+        "line_2": "#452",
+        "city": "Kansas City",
+        "state": "MO",
+        "zip": 64111
+    })";
+
+    address a;
+    a.line_1("111 W. 2nd St.");
+    a.line_2("#452");
+    a.city("Kansas City");
+    a.state("MO");
+    a.zip(64111);
+    rapidjson::Document& actual = a.to_json();
+    rapidjson::Document expected;
+    expected.Parse(expected_data);
+
+    REQUIRE(actual == expected);
 }
