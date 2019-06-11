@@ -8,6 +8,7 @@
 #include <rapidjson/schema.h>
 #include <rapidjson/stringbuffer.h>
 #include <rapidjson/writer.h>
+#include <boost/preprocessor.hpp>
 
 const char* address_schema = R"({
     "type": "object",
@@ -42,59 +43,44 @@ rapidjson::SchemaDocument parse_schema_document(const char* schema) {
     return rapidjson::SchemaDocument(doc);
 }
 
-class address {
+class message {
 public:
-
-    address()
+    message()
             :_document(rapidjson::kObjectType) { }
-
-    std::string_view line_1() const {
-        const auto& val = _document["line_1"];
-        return std::string_view(val.GetString(), val.GetStringLength());
-    }
-
-    std::string_view line_2() const {
-        const auto& val = _document["line_2"];
-        return std::string_view(val.GetString(), val.GetStringLength());
-    }
-
-    std::string_view city() const {
-        const auto& val = _document["city"];
-        return std::string_view(val.GetString(), val.GetStringLength());
-    }
-
-    std::string_view state() const {
-        const auto& val = _document["state"];
-        return std::string_view(val.GetString(), val.GetStringLength());
-    }
-
-    uint32_t zip() const {
-        return _document["zip"].GetInt();
-    }
-
-    void line_1(const std::string& line_1) {
-        _document.AddMember("line_1", line_1, _document.GetAllocator());
-    }
-
-    void line_2(const std::string& line_2) {
-        _document.AddMember("line_2", line_2, _document.GetAllocator());
-    }
-
-    void city(const std::string& city) {
-        _document.AddMember("city", city, _document.GetAllocator());
-    }
-
-    void state(const std::string& state) {
-        _document.AddMember("state", state, _document.GetAllocator());
-    }
-
-    void zip(uint32_t zip) {
-        _document.AddMember("zip", zip, _document.GetAllocator());
-    }
 
     rapidjson::Document& to_json() {
         return _document;
     }
+
+protected:
+    rapidjson::Document _document;
+};
+
+#define MSG_PROP_STRING(name)\
+    std::string_view name() const {\
+        const auto& val = _document[#name];\
+        return std::string_view(val.GetString(), val.GetStringLength());\
+    }\
+    void name(const std::string& name) {\
+        _document.AddMember(#name, name, _document.GetAllocator());\
+    }\
+
+#define MSG_PROP_UINT32(name)\
+    uint32_t name() const {\
+        return _document[#name].GetInt();\
+    }\
+    void name(uint32_t name) {\
+        _document.AddMember(#name, name, _document.GetAllocator());\
+    }\
+
+class address : public message {
+public:
+
+    MSG_PROP_STRING(line_1);
+    MSG_PROP_STRING(line_2);
+    MSG_PROP_STRING(city);
+    MSG_PROP_STRING(state);
+    MSG_PROP_UINT32(zip);
 
     static address from_json(const std::string& data) {
         static const rapidjson::SchemaDocument schema = parse_schema_document(address_schema);
@@ -117,9 +103,6 @@ public:
         a._document = std::move(doc);
         return a;
     }
-
-private:
-    rapidjson::Document _document;
 };
 
 TEST_CASE("basic address") {
